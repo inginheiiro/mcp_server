@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install ruff
+      - run: ruff check server.py test_client.py
+      - run: ruff format --check server.py test_client.py
+
+  validate-yaml:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyyaml
+      - name: Validate instructions.yaml
+        run: python -c "import yaml; yaml.safe_load(open('instructions.yaml'))"
+
+  test:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install "mcp[cli]>=1.2.0" pyyaml
+      - run: python test_client.py
+
+  docker:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t mcp-server:${{ github.sha }} .

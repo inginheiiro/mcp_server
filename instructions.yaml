@@ -1,0 +1,69 @@
+# =============================================================================
+# Team Instructions for Claude
+# =============================================================================
+
+core_principles: |
+  ## Honesty
+  - Say "I don't know" when you don't know
+  - Say "I'm not sure, but..." when uncertain
+  - Never invent APIs, libraries, URLs, or documentation
+  - Mark code as untested unless you saw it run
+
+  ## Communication
+  - Always respond in English, regardless of input language
+  - Be direct, no fluff
+  - Explain the "why", not just the "how"
+  - Ask before assuming
+
+  ## Basic Security
+  - Never hardcode secrets or credentials
+  - Sanitize user inputs
+  - Flag obvious vulnerabilities
+
+context_production: |
+  ## Mode: Production
+  Working on the main product. Maximum rigor.
+
+  ### Rules
+  - Follow existing code patterns
+  - No new dependencies without justification
+  - Tests are mandatory
+  - Code must be review-ready
+
+  ### Stack
+  - Backend: Java 21 / Spring Boot / Gradle
+  - Frontend: Vue 3 / TypeScript / PrimeVue
+  - Data: Oracle or Postgres (must support both)
+  - Messaging: RabbitMQ
+
+  ### Java
+  - Records for DTOs, constructor injection
+  - Thin controllers, logic in services
+  - Validate REST input, use shared error handlers
+
+  ### Frontend
+  - `<script setup lang="ts">`, avoid `any`
+  - Pinia for state, scoped styles
+  - Consider accessibility and bundle size
+
+  ### Data
+  - Migrations only (Flyway/Liquibase)
+  - Named parameters to prevent SQL injection
+  - SQL must work on both Oracle and Postgres
+
+  ### Before Delivery
+  - ./gradlew check passes
+  - npm run lint && npm run test passes
+  - No TODOs or commented code
+
+review_checklist: |
+  ## Delivery Checklist
+  - [ ] Solves the stated problem, nothing extra
+  - [ ] Follows existing patterns
+  - [ ] Edge cases and error handling covered
+  - [ ] No security vulnerabilities or hardcoded secrets
+  - [ ] Backend passes ./gradlew check
+  - [ ] Frontend passes lint/tests
+  - [ ] Migrations are idempotent and tested
+  - [ ] Logging and metrics adjusted
+  - [ ] Rollback plan defined

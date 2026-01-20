@@ -1,0 +1,85 @@
+# =============================================================================
+# Git Attributes - Line ending normalization
+# =============================================================================
+
+# Default: all text files normalized to LF in repo
+* text=auto eol=lf
+
+# =============================================================================
+# Scripts
+# =============================================================================
+*.sh text eol=lf
+*.bash text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# =============================================================================
+# Python
+# =============================================================================
+*.py text eol=lf
+*.pyi text eol=lf
+*.pyx text eol=lf
+requirements*.txt text eol=lf
+Pipfile text eol=lf
+pyproject.toml text eol=lf
+
+# =============================================================================
+# Config / Data
+# =============================================================================
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.env text eol=lf
+.env* text eol=lf
+
+# =============================================================================
+# Documentation
+# =============================================================================
+*.md text eol=lf
+*.txt text eol=lf
+*.rst text eol=lf
+LICENSE text eol=lf
+README text eol=lf
+
+# =============================================================================
+# Docker
+# =============================================================================
+Dockerfile text eol=lf
+Dockerfile.* text eol=lf
+docker-compose*.yml text eol=lf
+.dockerignore text eol=lf
+
+# =============================================================================
+# Web (if needed later)
+# =============================================================================
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.jsx text eol=lf
+
+# =============================================================================
+# Azure / IaC
+# =============================================================================
+*.bicep text eol=lf
+*.tf text eol=lf
+*.tfvars text eol=lf
+
+# =============================================================================
+# Binary files (no conversion)
+# =============================================================================
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.whl binary

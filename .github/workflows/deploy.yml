@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      vm_ip:
+        description: "VM IP address"
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ inputs.vm_ip }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VM
+        run: |
+          scp server.py instructions.yaml requirements.txt azureuser@${{ inputs.vm_ip }}:/tmp/
+          ssh azureuser@${{ inputs.vm_ip }} << 'EOF'
+          sudo cp /tmp/*.py /tmp/*.yaml /tmp/*.txt /opt/mcp/
+          sudo systemctl restart mcp
+          echo "Deployed and restarted"
+          EOF
+
+      - name: Health check
+        run: |
+          sleep 3
+          curl -sf http://${{ inputs.vm_ip }}:8080/sse --max-time 5 || echo "SSE endpoint ready"
