@@ -9,6 +9,7 @@ import logging
 from pathlib import Path
 from functools import lru_cache
 
+import os
 from mcp.server.fastmcp import FastMCP
 
 logging.basicConfig(
@@ -18,7 +19,19 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-mcp = FastMCP("team-instructions")
+# Configure security settings for Railway deployment
+transport_security = None
+if os.getenv("MCP_TRANSPORT") == "sse":
+    try:
+        from mcp.server.transport_security import TransportSecuritySettings
+        transport_security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=False,
+        )
+        logger.info("DNS rebinding protection disabled for SSE transport")
+    except ImportError:
+        logger.warning("TransportSecuritySettings not available")
+
+mcp = FastMCP("team-instructions", transport_security=transport_security)
 INSTRUCTIONS_FILE = Path(__file__).parent / "instructions.yaml"
 
 
@@ -193,8 +206,6 @@ def refresh() -> str:
 # =============================================================================
 
 if __name__ == "__main__":
-    import os
-
     transport = os.getenv("MCP_TRANSPORT", "stdio")
     port = int(os.getenv("PORT", os.getenv("MCP_PORT", "8080")))
 
@@ -217,28 +228,12 @@ if __name__ == "__main__":
 
         sse_app = mcp.sse_app()
 
-        # Wrapper to bypass host validation for Railway proxy
-        class HostFixMiddleware:
-            def __init__(self, app):
-                self.app = app
-
-            async def __call__(self, scope, receive, send):
-                if scope["type"] == "http":
-                    # Override host to localhost to pass validation
-                    headers = [(k, v) for k, v in scope["headers"] if k != b"host"]
-                    headers.append((b"host", b"localhost"))
-                    scope = dict(scope, headers=headers)
-                await self.app(scope, receive, send)
-
-        base_app = Starlette(
+        app = Starlette(
             routes=[
                 Route("/health", health),
                 Mount("/", app=sse_app),
             ]
         )
-
-        # Apply middleware to entire app
-        app = HostFixMiddleware(base_app)
 
         import uvicorn
         uvicorn.run(app, host="0.0.0.0", port=port)
