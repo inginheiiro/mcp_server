@@ -60,7 +60,7 @@ sudo mkdir -p /opt/mcp && sudo cp /tmp/*.py /tmp/*.yaml /tmp/*.txt /opt/mcp/
 cd /opt/mcp && sudo python3 -m venv venv && sudo ./venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Create systemd service (SSE mode)
-sudo tee /etc/systemd/system/mcp.service > /dev/null << 'SERVICE'
+sudo tee /etc/systemd/system/mcp.service > /dev/null << SERVICE
 [Unit]
 Description=MCP Instructions Server
 After=network.target

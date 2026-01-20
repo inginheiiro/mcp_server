@@ -32,7 +32,14 @@ COPY --chown=mcp:mcp instructions.yaml .
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
+ENV MCP_TRANSPORT=sse
+ENV MCP_PORT=8080
 
 USER mcp
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')" || exit 1
 
 CMD ["python", "server.py"]
