@@ -212,7 +212,9 @@ if __name__ == "__main__":
     if transport == "streamable-http":
         # Use FastMCP's built-in run for streamable-http (handles lifecycle)
         logger.info("Starting MCP server (streamable-http) on port %d", port)
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+        mcp.settings.port = port
+        mcp.settings.host = "0.0.0.0"
+        mcp.run(transport="streamable-http")
 
     elif transport == "sse":
         # SSE with custom health endpoint
