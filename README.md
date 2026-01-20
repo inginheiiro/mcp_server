@@ -8,7 +8,7 @@ Shared Claude instructions for teams. Edit `instructions.yaml`, everyone gets up
 
 ```bash
 docker compose up -d
-# Server runs at http://localhost:8080/sse
+# Server runs at http://localhost:8080/mcp
 ```
 
 ### Option 2: Python
@@ -35,14 +35,16 @@ Create config file:
 {
   "mcpServers": {
     "team-instructions": {
-      "type": "sse",
-      "url": "http://localhost:8080/sse"
+      "type": "streamable-http",
+      "url": "http://localhost:8080/mcp"
     }
   }
 }
 ```
 
 Replace `localhost:8080` with your server URL if remote.
+
+> **Note:** For legacy SSE transport, use `"type": "sse"` and `"url": "http://localhost:8080/sse"`
 
 ### If server runs via Python directly
 

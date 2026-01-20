@@ -23,7 +23,7 @@ echo "Deploying: $VM"
 echo "  Size: $SIZE (0.5 GB RAM, 1 vCPU)"
 echo "  Image: Ubuntu 24.04 Minimal"
 echo "  Disk: ${DISK_SIZE} GB"
-echo "  Port: $MCP_PORT (SSE)"
+echo "  Port: $MCP_PORT (streamable-http)"
 echo "  Est. cost: ~\$4/month"
 read -p "Continue? [y/N] " -n 1 -r && echo
 [[ $REPLY =~ ^[Yy]$ ]] || exit 0
@@ -69,7 +69,7 @@ After=network.target
 Type=simple
 User=nobody
 WorkingDirectory=/opt/mcp
-Environment=MCP_TRANSPORT=sse
+Environment=MCP_TRANSPORT=streamable-http
 Environment=MCP_PORT=$MCP_PORT
 ExecStart=/opt/mcp/venv/bin/python server.py
 Restart=on-failure
@@ -87,13 +87,14 @@ echo "====================================="
 echo "MCP Server deployed!"
 echo "====================================="
 echo ""
-echo "URL for devs: http://$IP:$MCP_PORT/sse"
+echo "URL for devs: http://$IP:$MCP_PORT/mcp"
 echo ""
 echo "Claude Desktop config (~/.config/claude/claude_desktop_config.json):"
 echo "{"
 echo "  \"mcpServers\": {"
 echo "    \"team-instructions\": {"
-echo "      \"url\": \"http://$IP:$MCP_PORT/sse\""
+echo "      \"type\": \"streamable-http\","
+echo "      \"url\": \"http://$IP:$MCP_PORT/mcp\""
 echo "    }"
 echo "  }"
 echo "}"
