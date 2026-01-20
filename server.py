@@ -217,19 +217,30 @@ if __name__ == "__main__":
 
         sse_app = mcp.sse_app()
 
-        # Remove host validation from sse_app if present
-        if hasattr(sse_app, 'middleware_stack'):
-            sse_app.middleware_stack = None
+        # Wrapper to bypass host validation for Railway proxy
+        class HostFixMiddleware:
+            def __init__(self, app):
+                self.app = app
+
+            async def __call__(self, scope, receive, send):
+                if scope["type"] == "http":
+                    # Override host to localhost to pass validation
+                    headers = [(k, v) for k, v in scope["headers"] if k != b"host"]
+                    headers.append((b"host", b"localhost"))
+                    scope = dict(scope, headers=headers)
+                await self.app(scope, receive, send)
+
+        wrapped_sse = HostFixMiddleware(sse_app)
 
         app = Starlette(
             routes=[
                 Route("/health", health),
-                Mount("/", app=sse_app),
+                Mount("/", app=wrapped_sse),
             ]
         )
 
         import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
+        uvicorn.run(app, host="0.0.0.0", port=port)
     else:
         logger.info("Starting MCP server (STDIO)")
         mcp.run()
