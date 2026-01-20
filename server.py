@@ -210,6 +210,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", os.getenv("MCP_PORT", "8080")))
 
     if transport in ("sse", "streamable-http"):
+        from contextlib import asynccontextmanager
         from starlette.applications import Starlette
         from starlette.responses import JSONResponse
         from starlette.routing import Route, Mount
@@ -228,16 +229,32 @@ if __name__ == "__main__":
         if transport == "streamable-http":
             logger.info("Starting MCP server (streamable-http) on port %d", port)
             mcp_app = mcp.streamable_http_app()
+
+            @asynccontextmanager
+            async def lifespan(app):
+                """Manage MCP session manager lifecycle."""
+                async with mcp_app.session_manager.run():
+                    logger.info("MCP session manager started")
+                    yield
+                logger.info("MCP session manager stopped")
+
+            app = Starlette(
+                routes=[
+                    Route("/health", health),
+                    Mount("/", app=mcp_app),
+                ],
+                lifespan=lifespan,
+            )
         else:
             logger.info("Starting MCP server (SSE) on port %d", port)
             mcp_app = mcp.sse_app()
 
-        app = Starlette(
-            routes=[
-                Route("/health", health),
-                Mount("/", app=mcp_app),
-            ]
-        )
+            app = Starlette(
+                routes=[
+                    Route("/health", health),
+                    Mount("/", app=mcp_app),
+                ]
+            )
 
         import uvicorn
         uvicorn.run(app, host="0.0.0.0", port=port)
