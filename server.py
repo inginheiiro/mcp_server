@@ -209,8 +209,15 @@ if __name__ == "__main__":
     transport = os.getenv("MCP_TRANSPORT", "stdio")
     port = int(os.getenv("PORT", os.getenv("MCP_PORT", "8080")))
 
-    if transport in ("sse", "streamable-http"):
-        from contextlib import asynccontextmanager
+    if transport == "streamable-http":
+        # Use FastMCP's built-in run for streamable-http (handles lifecycle)
+        logger.info("Starting MCP server (streamable-http) on port %d", port)
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+
+    elif transport == "sse":
+        # SSE with custom health endpoint
+        logger.info("Starting MCP server (SSE) on port %d", port)
+
         from starlette.applications import Starlette
         from starlette.responses import JSONResponse
         from starlette.routing import Route, Mount
@@ -220,44 +227,21 @@ if __name__ == "__main__":
             sections = list(load_instructions().keys())
             return JSONResponse({
                 "status": "ok",
-                "transport": transport,
+                "transport": "sse",
                 "instructions_loaded": len(sections),
                 "sections": sections
             })
 
-        # Use streamable-http (recommended) or SSE transport
-        if transport == "streamable-http":
-            logger.info("Starting MCP server (streamable-http) on port %d", port)
-            mcp_app = mcp.streamable_http_app()
-
-            @asynccontextmanager
-            async def lifespan(app):
-                """Manage MCP session manager lifecycle."""
-                async with mcp_app.session_manager.run():
-                    logger.info("MCP session manager started")
-                    yield
-                logger.info("MCP session manager stopped")
-
-            app = Starlette(
-                routes=[
-                    Route("/health", health),
-                    Mount("/", app=mcp_app),
-                ],
-                lifespan=lifespan,
-            )
-        else:
-            logger.info("Starting MCP server (SSE) on port %d", port)
-            mcp_app = mcp.sse_app()
-
-            app = Starlette(
-                routes=[
-                    Route("/health", health),
-                    Mount("/", app=mcp_app),
-                ]
-            )
+        app = Starlette(
+            routes=[
+                Route("/health", health),
+                Mount("/", app=mcp.sse_app()),
+            ]
+        )
 
         import uvicorn
         uvicorn.run(app, host="0.0.0.0", port=port)
+
     else:
         logger.info("Starting MCP server (STDIO)")
         mcp.run()
