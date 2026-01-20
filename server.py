@@ -217,6 +217,10 @@ if __name__ == "__main__":
 
         sse_app = mcp.sse_app()
 
+        # Remove host validation from sse_app if present
+        if hasattr(sse_app, 'middleware_stack'):
+            sse_app.middleware_stack = None
+
         app = Starlette(
             routes=[
                 Route("/health", health),
@@ -225,7 +229,7 @@ if __name__ == "__main__":
         )
 
         import uvicorn
-        uvicorn.run(app, host="0.0.0.0", port=port)
+        uvicorn.run(app, host="0.0.0.0", port=port, proxy_headers=True, forwarded_allow_ips="*")
     else:
         logger.info("Starting MCP server (STDIO)")
         mcp.run()
