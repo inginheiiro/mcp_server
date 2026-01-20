@@ -230,14 +230,15 @@ if __name__ == "__main__":
                     scope = dict(scope, headers=headers)
                 await self.app(scope, receive, send)
 
-        wrapped_sse = HostFixMiddleware(sse_app)
-
-        app = Starlette(
+        base_app = Starlette(
             routes=[
                 Route("/health", health),
-                Mount("/", app=wrapped_sse),
+                Mount("/", app=sse_app),
             ]
         )
+
+        # Apply middleware to entire app
+        app = HostFixMiddleware(base_app)
 
         import uvicorn
         uvicorn.run(app, host="0.0.0.0", port=port)
