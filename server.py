@@ -196,11 +196,36 @@ if __name__ == "__main__":
     import os
 
     transport = os.getenv("MCP_TRANSPORT", "stdio")
-    port = int(os.getenv("MCP_PORT", "8080"))
+    port = int(os.getenv("PORT", os.getenv("MCP_PORT", "8080")))
 
     if transport == "sse":
         logger.info("Starting MCP server (SSE) on port %d", port)
-        mcp.run(transport="sse", port=port)
+
+        from starlette.applications import Starlette
+        from starlette.responses import JSONResponse
+        from starlette.routing import Route, Mount
+
+        async def health(request):
+            """Health check endpoint."""
+            sections = list(load_instructions().keys())
+            return JSONResponse({
+                "status": "ok",
+                "transport": "sse",
+                "instructions_loaded": len(sections),
+                "sections": sections
+            })
+
+        sse_app = mcp.sse_app()
+
+        app = Starlette(
+            routes=[
+                Route("/health", health),
+                Mount("/", app=sse_app),
+            ]
+        )
+
+        import uvicorn
+        uvicorn.run(app, host="0.0.0.0", port=port)
     else:
         logger.info("Starting MCP server (STDIO)")
         mcp.run()
