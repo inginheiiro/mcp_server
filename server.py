@@ -21,13 +21,13 @@ logger = logging.getLogger(__name__)
 
 # Configure security settings for Railway deployment
 transport_security = None
-if os.getenv("MCP_TRANSPORT") == "sse":
+if os.getenv("MCP_TRANSPORT") in ("sse", "streamable-http"):
     try:
         from mcp.server.transport_security import TransportSecuritySettings
         transport_security = TransportSecuritySettings(
             enable_dns_rebinding_protection=False,
         )
-        logger.info("DNS rebinding protection disabled for SSE transport")
+        logger.info("DNS rebinding protection disabled for HTTP transport")
     except ImportError:
         logger.warning("TransportSecuritySettings not available")
 
