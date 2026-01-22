@@ -148,12 +148,14 @@ Windows:
 ## Test Server
 
 ```bash
-# Health check (SSE transport only)
-curl https://your-server/health
+# Health check (SSE transport only - not available in streamable-http)
+curl http://localhost:8080/health
 
-# Test MCP endpoint
-curl -X POST https://your-server/mcp \
+# Test streamable-http endpoint
+curl -X POST http://localhost:8080/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"1.0"}}}'
 ```
+
+**Note:** The `/health` endpoint only exists when using SSE transport. For streamable-http, use the MCP endpoint test above.
