@@ -1,10 +1,9 @@
 # =============================================================================
-# Single-stage build with Microsoft Container Registry image
-# Alternative: replace mcr.microsoft.com/devcontainers/python:3.12
-# with python:3.12-slim if Docker Hub is accessible
+# Single-stage build with GitHub Container Registry image
+# Alternative: python:3.12-slim (Docker Hub) if accessible
 # =============================================================================
 
-FROM mcr.microsoft.com/devcontainers/python:3.12-slim
+FROM ghcr.io/astral-sh/uv:python3.12-alpine
 
 WORKDIR /app
 
