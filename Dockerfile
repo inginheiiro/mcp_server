@@ -1,41 +1,24 @@
 # =============================================================================
-# Multi-stage build with slim image
+# Single-stage build with Microsoft Container Registry image
+# Alternative: replace mcr.microsoft.com/devcontainers/python:3.12
+# with python:3.12-slim if Docker Hub is accessible
 # =============================================================================
 
-FROM python:3.12-slim AS builder
+FROM mcr.microsoft.com/devcontainers/python:3.12-slim
 
-WORKDIR /build
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# -----------------------------------------------------------------------------
-FROM python:3.12-slim AS runtime
-
-RUN useradd --system --no-create-home --shell /bin/false mcp
-
-WORKDIR /app
-
-COPY --from=builder /opt/venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
-
-COPY --chown=mcp:mcp server.py .
-COPY --chown=mcp:mcp instructions.yaml .
+COPY server.py .
+COPY instructions.yaml .
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV MCP_TRANSPORT=streamable-http
 ENV MCP_PORT=8080
-
-USER mcp
 
 EXPOSE 8080
 
