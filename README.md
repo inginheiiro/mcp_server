@@ -33,6 +33,16 @@ MCP_TRANSPORT=streamable-http
 PORT=8080
 ```
 
+## Which Option to Choose?
+
+| Mode | Best For | Cost | Latency |
+|------|----------|------|---------|
+| **stdio** (local Python) | Personal use | Free | ~0ms |
+| **Docker** | Local dev/testing HTTP | Free | ~10ms |
+| **Railway/Cloud** | Team sharing | Pay per use | ~100ms+ |
+
+**Note:** The server only gets called when you invoke a prompt (`/team-instructions:production`, etc.). Normal Claude messages don't hit the server. Instructions are loaded once into the conversation context.
+
 ## Connect Claude Code
 
 Create config file:

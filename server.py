@@ -144,18 +144,15 @@ Do whatever makes sense for the task at hand. Full creative freedom."""
 
 
 @mcp.prompt()
-def code_review(code: str, language: str = "python") -> str:
+def code_review() -> str:
     """Review code with team standards."""
-    return f"""{get_section("core_principles")}
+    return f"""You are in CODE REVIEW mode. Apply these standards when reviewing code:
+
+{get_section("core_principles")}
 
 {get_section("context_production")}
 
 {get_section("review_checklist")}
-
-## Code to Review
-```{language}
-{code}
-```
 
 Be direct. If unsure about something, say so."""
 
