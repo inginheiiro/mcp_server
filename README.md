@@ -33,13 +33,46 @@ MCP_TRANSPORT=streamable-http
 PORT=8080
 ```
 
+### Option 4: Azure Container Instances
+
+```bash
+./deploy.sh
+```
+
+Requirements: Azure CLI (`az`) and Docker installed.
+
+The script creates:
+- Resource Group
+- Azure Container Registry
+- Container Instance with public URL
+
+**Redeploy after changes:**
+```bash
+# Set your ACR name (check Azure portal or use: az acr list -g rg-mcp-server --query "[0].name" -o tsv)
+ACR=your-acr-name
+
+# Build, push and restart
+az acr login -n $ACR
+docker build -t $ACR.azurecr.io/mcp-server:latest .
+docker push $ACR.azurecr.io/mcp-server:latest
+az container restart -g rg-mcp-server -n mcp-server
+```
+
+**Useful commands:**
+```bash
+az container logs -g rg-mcp-server -n mcp-server      # View logs
+az container restart -g rg-mcp-server -n mcp-server   # Restart
+az group delete -n rg-mcp-server --yes                # Delete all
+```
+
 ## Which Option to Choose?
 
 | Mode | Best For | Cost | Latency |
 |------|----------|------|---------|
 | **stdio** (local Python) | Personal use | Free | ~0ms |
-| **Docker** | Local dev/testing HTTP | Free | ~10ms |
-| **Railway/Cloud** | Team sharing | Pay per use | ~100ms+ |
+| **Docker** | Local dev/testing | Free | ~10ms |
+| **Railway** | Quick deploy | Pay per use | ~100ms+ |
+| **Azure ACI** | Team sharing, Azure users | ~$1-2/month | ~100ms+ |
 
 **Note:** The server only gets called when you invoke a prompt (`/team-instructions:production`, etc.). Normal Claude messages don't hit the server. Instructions are loaded once into the conversation context.
 
